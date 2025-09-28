@@ -292,7 +292,7 @@ size_t strftime(char *buff, size_t max, const char *restrict format, const struc
 ![FUSE](fuse.png)
 
 
-1. Пользователь вызывает `ls -l /tmp/fuse`.
+1. Вызываем `ls -l /tmp/fuse`.
    → `ls` через `libc` делает syscalls (`open`, `getdents`, `stat`).
 
 2. Ядро получает вызовы и через **VFS** понимает: `/tmp/fuse` смонтирован через FUSE.
