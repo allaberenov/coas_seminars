@@ -313,3 +313,36 @@ size_t strftime(char *buff, size_t max, const char *restrict format, const struc
 Для реализации своей файловой системы нужно прописать структуру `fuse_operations`. В примере из папки `fuse` используются несколько основных вызовов, полный список можно найти в документации: https://libfuse.github.io/doxygen/structfuse__operations.html
 
 Запуск: `./fuse_demo foo --src kek.txt` (директория `foo` должна существовать и быть пустой). После использования нужно не забыть отмонтировать ФС `fusermount -u foo`. Для отладки рекомендуется вызывать под `strace` стандартные команды такие как `stat`, `ls` и другие.
+
+### Где это может пригодится?
+
+sshfs = SSH File System.
+Это программа, которая позволяет «подключить» папку с удалённого сервера (по SSH) так, будто она находится у тебя локально.
+
+Допустим, есть сервер user@server, и там лежит /home/user/data.
+
+Можно сделать 
+``
+sudo apt install sshfs
+mkdir ~/remote
+sshfs user@server:/home/user/data ~/remote
+``
+
+Если сделать ls ~/remote, то можно увидеть файлы сервера.
+
+Если сделать cat ~/remote/file.txt, прочитать файл на сервере.
+
+Если скопируешь туда что-то (cp local.txt ~/remote/), файл реально появится на сервере.
+
+#### Как работает под капотом?
+* Обращаемся к /home/username/remote/file.txt.
+
+* Твой cat делает обычный syscall open, read.
+
+* Ядро видит: «Каталог ~/remote смонтирован через FUSE».
+
+* Драйвер FUSE отправляет запрос в программу sshfs.
+
+* sshfs по SSH связывается с сервером и делает там операцию через реализованные с libfuse функции(open, read, write).
+
+* Результат возвращается назад.
